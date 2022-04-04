@@ -1,0 +1,55 @@
+name: Build Docker images, push to Docker Hub
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: langameai
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - 
+        name: Get the tag
+        id: get_tag_name
+        run: echo ::set-output name=GIT_TAG_NAME::${GITHUB_REF/refs\/tags\//}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            langameai/search-engine:latest
+            langameai/search-engine:${{ steps.get_tag_name.outputs.GIT_TAG_NAME}}
+            ghcr.io/${{ github.repository_owner }}/search-engine:latest
+            ghcr.io/${{ github.repository_owner }}/search-engine:${{ steps.get_tag_name.outputs.GIT_TAG_NAME}}
+      - 
+        name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository_owner }}/search-engine
