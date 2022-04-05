@@ -55,7 +55,7 @@ ops/release:
 	git push origin main; \
 	git tag v$$VERSION; \
 	git push origin v$$VERSION
-	echo "Done, check https://github.com/langame-ai/search-server/actions"
+	echo "Done, check https://github.com/langa-me/search-server/actions"
 
 
 .PHONY: help

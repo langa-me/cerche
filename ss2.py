@@ -88,8 +88,8 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         message =  threading.currentThread().getName()
-        self.wfile.write(message)
-        self.wfile.write('\n')
+        self.wfile.write(message.encode())
+        self.wfile.write('\n'.encode())
         return
 
     def do_POST(self):
