@@ -38,7 +38,7 @@ jobs:
         # firstString="I love Suzi and Marry"
         # secondString="Sara"
         # echo "${firstString/Suzi/"$secondString"}"    
-        run: echo "${{github.ref_name}}" | sed 's/^v//'
+        run: echo "${{github.ref_name}}" | sed 's/^v//' >> $GITHUB_ENV
       -
         name: Build and push
         uses: docker/build-push-action@v2
