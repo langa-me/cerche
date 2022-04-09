@@ -49,9 +49,9 @@ jobs:
           push: true
           tags: |
             langameai/search-engine:latest
-            langameai/search-engine:$TAG_NAME
+            langameai/search-engine:${{ env.TAG_NAME }}
             ghcr.io/${{ github.repository_owner }}/search-engine:latest
-            ghcr.io/${{ github.repository_owner }}/search-engine:$TAG_NAME
+            ghcr.io/${{ github.repository_owner }}/search-engine:${{ env.TAG_NAME }}
       - 
         name: Release
         uses: softprops/action-gh-release@v1
