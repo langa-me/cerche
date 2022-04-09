@@ -1,10 +1,24 @@
-REGISTRY ?= 5306t2h8.gra7.container-registry.ovh.net/$(shell cat .env | grep OVH_PROJECT_ID | cut -d '=' -f 2)/search-server
 VERSION ?= $(shell cat setup.py | grep version | cut -d '"' -f 2)
 GCLOUD_PROJECT:=$(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
+NAME ?= search-engine
+
+ifeq ($(GCLOUD_PROJECT),langame-dev)
+$(info "Using develoment configuration")
+REGISTRY ?= 5306t2h8.gra7.container-registry.ovh.net/dev/${NAME}
+else
+$(info "Using production configuration")
+REGISTRY ?= 5306t2h8.gra7.container-registry.ovh.net/prod/${NAME}
+endif
+
+prod: ## Set the GCP project to prod
+	gcloud config set project langame-86ac4
+
+dev: ## Set the GCP project to dev
+	gcloud config set project langame-dev
+
 
 docker/build: ## [Local development] build the docker image
-	docker build -t ${REGISTRY}:${VERSION} . -f ./Dockerfile
-	docker build -t ${REGISTRY}:latest . -f ./Dockerfile
+	docker buildx build -t ${REGISTRY}:${VERSION} -t ${REGISTRY}:latest --platform linux/amd64 . -f ./Dockerfile
 
 docker/run: docker/build ## [Local development] run the docker container
 	docker run ${REGISTRY}:latest
@@ -25,27 +39,10 @@ bare/install: ## [Local development] Upgrade pip, install requirements, install 
 bare/run: ## [Local development] run the main entrypoint
 	python3 $(shell pwd)/ss2.py serve --host "0.0.0.0:8082"
 
-
-ops/prod: ## Set the GCP project to prod
-	@gcloud config set project langame-86ac4 2>/dev/null
-	@sed -i 's/OVH_PROJECT_ID=.*/OVH_PROJECT_ID="prod"/' .env
-	@echo "Configured GCP project, OVHCloud project and k8s"
-
-ops/dev: ## Set the GCP project to dev
-	@gcloud config set project langame-dev 2>/dev/null
-	@sed -i 's/OVH_PROJECT_ID=.*/OVH_PROJECT_ID="dev"/' .env
-	@echo "Configured GCP project, OVHCloud project and k8s"
-
-
-
-ops/lint: ## [Local development] Run pylint to check code style.
-	@echo "Linting"
-	env/bin/python3 -m pylint ava
-
-ops/clean:
+clean:
 	rm -rf env .pytest_cache *.egg-info **/*__pycache__
 
-ops/release:
+release:
 	@VERSION=$$(cat setup.py | grep version | cut -d '"' -f 2); \
 	echo "Releasing version $$VERSION"; \
 	git add .; \
