@@ -35,7 +35,7 @@ jobs:
         name: Get the tag
         id: get_tag_name
         # set the tag without the "v" prefix
-        run: echo "{{ github.ref_name | replace(\"refs/tags/\", \"\") }}"
+        run: echo "{{ github.ref_name | replace(\"v\", \"\") }}"
       -
         name: Build and push
         uses: docker/build-push-action@v2
