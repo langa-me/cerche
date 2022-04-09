@@ -52,7 +52,7 @@ release:
 	git push origin main; \
 	git tag v$$VERSION; \
 	git push origin v$$VERSION
-	echo "Done, check https://github.com/langa-me/search-server/actions"
+	echo "Done, check https://github.com/langa-me/search-engine/actions"
 
 
 .PHONY: help

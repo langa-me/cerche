@@ -35,7 +35,10 @@ jobs:
         name: Get the tag
         id: get_tag_name
         # set the tag without the "v" prefix
-        run: echo "{{ github.ref_name | replace(\"v\", \"\") }}"
+        # firstString="I love Suzi and Marry"
+        # secondString="Sara"
+        # echo "${firstString/Suzi/"$secondString"}"    
+        run: echo "${{github.ref_name}}" | sed 's/^v//'
       -
         name: Build and push
         uses: docker/build-push-action@v2
