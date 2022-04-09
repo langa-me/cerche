@@ -9,7 +9,7 @@ if __name__ == "__main__":
         name="search-engine",
         packages=find_packages(),
         include_package_data=True,
-        version="0.1.6",
+        version="0.1.7",
         description="",
         long_description=long_description,
         long_description_content_type="text/markdown",

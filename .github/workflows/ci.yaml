@@ -38,7 +38,7 @@ jobs:
         # firstString="I love Suzi and Marry"
         # secondString="Sara"
         # echo "${firstString/Suzi/"$secondString"}"    
-        run: echo "${{github.ref_name}}" | sed 's/^v//' >> $GITHUB_ENV
+        run: echo "TAG_NAME=$(echo ${{github.ref_name}} | sed 's/^v//')" >> $GITHUB_ENV
       -
         name: Build and push
         uses: docker/build-push-action@v2
@@ -49,9 +49,9 @@ jobs:
           push: true
           tags: |
             langameai/search-engine:latest
-            langameai/search-engine:${{ steps.get_tag_name.outputs.GIT_TAG_NAME}}
+            langameai/search-engine:$TAG_NAME
             ghcr.io/${{ github.repository_owner }}/search-engine:latest
-            ghcr.io/${{ github.repository_owner }}/search-engine:${{ steps.get_tag_name.outputs.GIT_TAG_NAME}}
+            ghcr.io/${{ github.repository_owner }}/search-engine:$TAG_NAME
       - 
         name: Release
         uses: softprops/action-gh-release@v1
