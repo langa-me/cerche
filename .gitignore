@@ -1,2 +1,6 @@
 env
 .env
+
+# python garbage
+*.egg-info
+*.pyc

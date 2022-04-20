@@ -31,6 +31,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Login to OVHCloud Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ${{ secrets.OVHCLOUD_REGISTRY }}
+          username: ${{ secrets.OVHCLOUD_REGISTRY_USERNAME }}
+          password: ${{ secrets.OVHCLOUD_REGISTRY_PASSWORD }}
       - 
         name: Get the tag
         id: get_tag_name
@@ -52,6 +59,8 @@ jobs:
             langameai/search-engine:${{ env.TAG_NAME }}
             ghcr.io/${{ github.repository_owner }}/search-engine:latest
             ghcr.io/${{ github.repository_owner }}/search-engine:${{ env.TAG_NAME }}
+            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/search-engine:latest
+            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/search-engine:${{ env.TAG_NAME }}
       - 
         name: Release
         uses: softprops/action-gh-release@v1

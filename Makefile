@@ -23,6 +23,9 @@ docker/build: ## [Local development] build the docker image
 docker/run: docker/build ## [Local development] run the docker container
 	docker run ${REGISTRY}:latest
 
+docker/run/hub:
+	docker run --rm --name search -p 8082:8082 langameai/search-engine:latest serve --host "0.0.0.0:8082"
+
 docker/push: docker/build ## [Local development] push the docker image to GCR
 	docker push ${REGISTRY}:${VERSION}
 	docker push ${REGISTRY}:latest
@@ -37,7 +40,7 @@ bare/install: ## [Local development] Upgrade pip, install requirements, install 
 	)
 
 bare/run: ## [Local development] run the main entrypoint
-	python3 $(shell pwd)/ss2.py serve --host "0.0.0.0:8082"
+	python3 $(shell pwd)/ss2.py serve --host "0.0.0.0:8083"
 
 clean:
 	rm -rf env .pytest_cache *.egg-info **/*__pycache__
