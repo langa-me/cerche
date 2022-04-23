@@ -2,6 +2,9 @@ VERSION ?= $(shell cat setup.py | grep version | cut -d '"' -f 2)
 GCLOUD_PROJECT:=$(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
 NAME ?= search-engine
 
+GOOGLE_SEARCH_CX := $(shell cat .env | grep -w GOOGLE_SEARCH_CX | cut -d "=" -f 2)
+GOOGLE_SEARCH_KEY := $(shell cat .env | grep -w GOOGLE_SEARCH_KEY | cut -d "=" -f 2)
+
 ifeq ($(GCLOUD_PROJECT),langame-dev)
 $(info "Using develoment configuration")
 REGISTRY ?= 5306t2h8.gra7.container-registry.ovh.net/dev/${NAME}
@@ -41,6 +44,17 @@ bare/install: ## [Local development] Upgrade pip, install requirements, install 
 
 bare/run: ## [Local development] run the main entrypoint
 	python3 $(shell pwd)/ss2.py serve --host "0.0.0.0:8083"
+
+bare/run/test: ## [Local development] run the main entrypoint with official google
+	python3 $(shell pwd)/ss2.py test_server --host "0.0.0.0:8083" \
+		--query turing \
+		--n 3
+
+bare/run/google_official: ## [Local development] run the main entrypoint with official google
+	python3 $(shell pwd)/ss2.py serve --host "0.0.0.0:8083" \
+		--use_official_google_api True \
+		--google_search_key ${GOOGLE_SEARCH_CX} \
+		--google_search_cx ${GOOGLE_SEARCH_KEY}
 
 clean:
 	rm -rf env .pytest_cache *.egg-info **/*__pycache__

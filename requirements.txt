@@ -1,6 +1,6 @@
 bs4
 chardet
-fairseq
+# fairseq
 fire
 html2text
 html5lib
@@ -10,3 +10,4 @@ parlai
 requests
 rich
 lxml
+googlesearch-python

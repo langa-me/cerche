@@ -29,13 +29,14 @@ _STYLE_GOOD = "[green]"
 _STYLE_SKIP = ""
 _CLOSE_STYLE_GOOD = "[/]" if _STYLE_GOOD else ""
 _CLOSE_STYLE_SKIP = "[/]" if _STYLE_SKIP else ""
-_REQUESTS_GET_TIMEOUT = 5 # seconds
+_REQUESTS_GET_TIMEOUT = 5  # seconds
 
 # Bing Search API documentation:
 # https://docs.microsoft.com/en-us/bing/search-apis/bing-web-search/reference/query-parameters
 
+
 def _parse_host(host: str) -> Tuple[str, int]:
-    """ Parse the host string.
+    """Parse the host string.
     Should be in the format HOSTNAME:PORT.
     Example: 0.0.0.0:8080
     """
@@ -44,8 +45,9 @@ def _parse_host(host: str) -> Tuple[str, int]:
     port = splitted[1] if len(splitted) > 1 else _DEFAULT_PORT
     return hostname, int(port)
 
+
 def _get_and_parse(url: str) -> Dict[str, str]:
-    """ Download a webpage and parse it. """
+    """Download a webpage and parse it."""
 
     try:
         resp = requests.get(url, timeout=_REQUESTS_GET_TIMEOUT)
@@ -66,9 +68,7 @@ def _get_and_parse(url: str) -> Dict[str, str]:
         html.unescape(pre_rendered.renderContents().decode()) if pre_rendered else ""
     )
 
-    output_dict["title"] = (
-        output_dict["title"].replace("\n", "").replace("\r", "")
-    )
+    output_dict["title"] = output_dict["title"].replace("\n", "").replace("\r", "")
 
     ###########################################################################
     # Prepare the content
@@ -83,18 +83,19 @@ def _get_and_parse(url: str) -> Dict[str, str]:
 
     return output_dict
 
+
 class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        message =  threading.currentThread().getName()
+        message = threading.currentThread().getName()
         self.wfile.write(message.encode())
-        self.wfile.write('\n'.encode())
+        self.wfile.write("\n".encode())
         return
 
     def do_POST(self):
 
-        """ Handle POST requests from the client. (All requests are POST) """
+        """Handle POST requests from the client. (All requests are POST)"""
 
         #######################################################################
         # Prepare and Parse
@@ -104,7 +105,9 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
 
         # Figure out the encoding
         if "charset=" in self.headers["Content-Type"]:
-            charset = re.match(r".*charset=([\w_\-]+)\b.*", self.headers["Content-Type"]).group(1)
+            charset = re.match(
+                r".*charset=([\w_\-]+)\b.*", self.headers["Content-Type"]
+            ).group(1)
         else:
             detector = chardet.UniversalDetector()
             detector.feed(post_data)
@@ -131,9 +134,12 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
         dupe_detection_set = set()
 
         urls = []
-        results = self.search(q=q, n=n, 
-            subscription_key = self.server.subscription_key, 
-            use_description_only=self.server.use_description_only)
+        results = self.search(
+            q=q,
+            n=n,
+            subscription_key=self.server.subscription_key,
+            use_description_only=self.server.use_description_only,
+        )
 
         if self.server.use_description_only:
             content = results
@@ -158,14 +164,12 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
                 reason_already_seen_content = (
                     maybe_content["content"] in dupe_detection_set
                 )
-                reason_content_forbidden = (
-                    maybe_content["content"] == "Forbidden"
-                )
+                reason_content_forbidden = maybe_content["content"] == "Forbidden"
             else:
                 reason_content_empty = False
                 reason_already_seen_content = False
                 reason_content_forbidden = False
- 
+
             reasons = dict(
                 reason_empty_response=reason_empty_response,
                 reason_content_empty=reason_content_empty,
@@ -191,15 +195,17 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
                 # Strip out all lines starting with "* " usually menu items
                 if self.server.strip_html_menus:
                     new_content = ""
-                    for line in maybe_content['content'].splitlines():
+                    for line in maybe_content["content"].splitlines():
                         x = re.findall("^[\s]*\\* ", line)
                         if line != "" and (not x or len(line) > 50):
                             new_content += line + "\n"
 
-                    maybe_content['content'] = filter_special_chars(new_content)
+                    maybe_content["content"] = filter_special_chars(new_content)
 
                 # Truncate text
-                maybe_content['content'] = maybe_content['content'][:self.server.max_text_bytes]
+                maybe_content["content"] = maybe_content["content"][
+                    : self.server.max_text_bytes
+                ]
 
                 dupe_detection_set.add(maybe_content["content"])
                 content.append(maybe_content)
@@ -217,8 +223,10 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
                         if whether_failed
                     }
                 )
-                print(f" {_STYLE_SKIP}x{_CLOSE_STYLE_SKIP} Excluding an URL because `{_STYLE_SKIP}{reason_string}{_CLOSE_STYLE_SKIP}`:\n"
-                      f"   {url}")
+                print(
+                    f" {_STYLE_SKIP}x{_CLOSE_STYLE_SKIP} Excluding an URL because `{_STYLE_SKIP}{reason_string}{_CLOSE_STYLE_SKIP}`:\n"
+                    f"   {url}"
+                )
 
         ###############################################################
         # Prepare the answer and send it
@@ -231,11 +239,13 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(output)
 
-    def search(self, 
-            q: str, n: int, 
-            subscription_key: str = "", 
-            use_description_only: bool = False
-        ) -> Generator[str, None, None]:
+    def search(
+        self,
+        q: str,
+        n: int,
+        subscription_key: str = "",
+        use_description_only: bool = False,
+    ) -> Generator[str, None, None]:
 
         return NotImplemented(
             "Search is an abstract base class, not meant to be directly "
@@ -243,33 +253,40 @@ class SearchABCRequestHandler(http.server.BaseHTTPRequestHandler):
             "GoogleSearch."
         )
 
+
 def filter_special_chars(title):
     title = title.replace("&quot", "")
     title = title.replace("&amp", "")
     title = title.replace("&gt", "")
     title = title.replace("&lt", "")
     title = title.replace("&#39", "")
-    title = title.replace("\u2018", "") # unicode single quote
-    title = title.replace("\u2019", "") # unicode single quote
-    title = title.replace("\u201c", "") # unicode left double quote 
-    title = title.replace("\u201d", "") # unicode right double quote 
-    title = title.replace("\u8220", "") # unicode left double quote 
-    title = title.replace("\u8221", "") # unicode right double quote
-    title = title.replace("\u8222", "") # unicode double low-9 quotation mark
-    title = title.replace("\u2022", "") # unicode bullet 
-    title = title.replace("\u2013", "") # unicode dash 
-    title = title.replace("\u00b7", "") # unicode middle dot
-    title = title.replace("\u00d7", "") # multiplication sign
+    title = title.replace("\u2018", "")  # unicode single quote
+    title = title.replace("\u2019", "")  # unicode single quote
+    title = title.replace("\u201c", "")  # unicode left double quote
+    title = title.replace("\u201d", "")  # unicode right double quote
+    title = title.replace("\u8220", "")  # unicode left double quote
+    title = title.replace("\u8221", "")  # unicode right double quote
+    title = title.replace("\u8222", "")  # unicode double low-9 quotation mark
+    title = title.replace("\u2022", "")  # unicode bullet
+    title = title.replace("\u2013", "")  # unicode dash
+    title = title.replace("\u00b7", "")  # unicode middle dot
+    title = title.replace("\u00d7", "")  # multiplication sign
     return title
+
 
 class BingSearchRequestHandler(SearchABCRequestHandler):
     bing_search_url = "https://api.bing.microsoft.com/v7.0/search"
 
-    def search(self, 
-            q: str, n: int, 
-            subscription_key: str = None, 
-            use_description_only: bool = False
-        ) -> Generator[str, None, None]:
+    def search(
+        self,
+        q: str,
+        n: int,
+        subscription_key: str = None,
+        use_description_only: bool = False,
+        use_official_google_api: bool = False,
+        google_search_key: str = None,
+        google_search_cx: str = None,
+    ) -> Generator[str, None, None]:
 
         assert subscription_key
         types = ["News", "Entities", "Places", "Webpages"]
@@ -277,11 +294,17 @@ class BingSearchRequestHandler(SearchABCRequestHandler):
 
         print(f"n={n} responseFilter={types}")
         headers = {"Ocp-Apim-Subscription-Key": subscription_key}
-        params = {"q": q, "textDecorations":False,
-            "textFormat": "HTML", "responseFilter":types, 
-            "promote":promote, "answerCount":5}
-        response = requests.get(BingSearchRequestHandler.bing_search_url, 
-            headers=headers, params=params)
+        params = {
+            "q": q,
+            "textDecorations": False,
+            "textFormat": "HTML",
+            "responseFilter": types,
+            "promote": promote,
+            "answerCount": 5,
+        }
+        response = requests.get(
+            BingSearchRequestHandler.bing_search_url, headers=headers, params=params
+        )
         response.raise_for_status()
         search_results = response.json()
 
@@ -323,18 +346,20 @@ class BingSearchRequestHandler(SearchABCRequestHandler):
 
             if self.server.use_description_only:
                 content = title + ". "
-                if "snippet" in item :
+                if "snippet" in item:
                     snippet = filter_special_chars(item["snippet"])
                     content += snippet
                     print(f"Adding webpage summary with title {title} for url {url}")
-                    contents.append({'title': title, 'url': url, 'content': content})
+                    contents.append({"title": title, "url": url, "content": content})
 
                 elif "description" in item:
                     if news_count < 3:
                         text = filter_special_chars(item["description"])
                         content += text
                         news_count += 1
-                        contents.append({'title': title, 'url': url, 'content': content})
+                        contents.append(
+                            {"title": title, "url": url, "content": content}
+                        )
                 else:
                     print(f"Could not find descripton for item {item}")
             else:
@@ -342,27 +367,70 @@ class BingSearchRequestHandler(SearchABCRequestHandler):
                     urls.append(url)
 
         if len(urls) == 0 and not use_description_only:
-           print(f"Warning: No Bing URLs found for query {q}")
+            print(f"Warning: No Bing URLs found for query {q}")
 
         if use_description_only:
             return contents
         else:
             return urls
 
-class GoogleSearchRequestHandler(SearchABCRequestHandler):
-    def search(self, q: str, n: int,
-            subscription_key: str = None,
-            use_description_only: bool = False
-        ) -> Generator[str, None, None]:
 
-        return googlesearch.search(q, num=n, stop=None, pause=_DELAY_SEARCH)
+class GoogleSearchRequestHandler(SearchABCRequestHandler):
+    google_search_url = "https://www.googleapis.com/customsearch/v1"
+
+    def search(
+        self,
+        q: str,
+        n: int,
+        subscription_key: str = None,
+        use_description_only: bool = False,
+        use_official_google_api: bool = False,
+        google_search_key: str = None,
+        google_search_cx: str = None,
+    ) -> Generator[str, None, None]:
+        if not use_official_google_api:
+            return googlesearch.search(q, num=n, stop=None, pause=_DELAY_SEARCH)
+        else:
+            """
+            https://developers.google.com/custom-search/json-api/v1/reference/cse/list
+            """
+            if use_description_only:
+                raise NotImplementedError(
+                    "Google Search does not support description only mode yet"
+                )
+            base_url = f"{self.google_search_url}?key={self.google_search_key}&cx={self.google_search_cx}"
+            url = f"{base_url}&q={q}&num={n}"
+            # make the API request
+            response = requests.get(url)
+            response.raise_for_status()
+            json_response = response.json()
+            if "items" not in json_response or len(json_response["items"]) == 0:
+                # add in url intitle="information""
+                url = f"{base_url}&q=intitle:{q}&num={n}"
+                response = requests.get(url)
+                response.raise_for_status()
+                json_response = response.json()
+            data = []
+            if "items" not in json_response:
+                return data
+            for index, item in enumerate(json_response["items"]):
+                data.append(item["link"])
+            return data
+
 
 class SearchABCServer(http.server.ThreadingHTTPServer):
-    def __init__(self, 
-            server_address, RequestHandlerClass, 
-            max_text_bytes, strip_html_menus,
-            use_description_only = False, subscription_key = None 
-        ):
+    def __init__(
+        self,
+        server_address,
+        RequestHandlerClass,
+        max_text_bytes,
+        strip_html_menus,
+        use_description_only=False,
+        subscription_key=None,
+        use_official_google_api: bool = False,
+        google_search_key: str = None,
+        google_search_cx: str = None,
+    ):
 
         self.max_text_bytes = max_text_bytes
         self.strip_html_menus = strip_html_menus
@@ -371,17 +439,22 @@ class SearchABCServer(http.server.ThreadingHTTPServer):
 
         super().__init__(server_address, RequestHandlerClass)
 
+
 class Application:
     def serve(
-            self, host: str = _DEFAULT_HOST,
-            requests_get_timeout = _REQUESTS_GET_TIMEOUT,
-            strip_html_menus = False,
-            max_text_bytes = None,
-            search_engine = "Google",
-            use_description_only = False,
-            subscription_key = None
-        ) -> NoReturn:
-        """ Main entry point: Start the server.
+        self,
+        host: str = _DEFAULT_HOST,
+        requests_get_timeout: int = _REQUESTS_GET_TIMEOUT,
+        strip_html_menus: bool = False,
+        max_text_bytes: int = None,
+        search_engine: str = "Google",
+        use_description_only: bool = False,
+        subscription_key: str = None,
+        use_official_google_api: bool = False,
+        google_search_key: str = None,
+        google_search_cx: str = None,
+    ) -> NoReturn:
+        """Main entry point: Start the server.
         Arguments:
             host (str):
             requests_get_timeout (int):
@@ -390,6 +463,9 @@ class Application:
             search_engine (str):
             use_description_only (bool):
             subscription_key (str):
+            use_official_google_api (bool):
+            google_search_key (str):
+            google_search_cx (str):
         HOSTNAME:PORT of the server. HOSTNAME can be an IP.
         Most of the time should be 0.0.0.0. Port 8080 doesn't work on colab.
         Other ports also probably don't work on colab, test it out.
@@ -398,11 +474,15 @@ class Application:
         max_text_bytes limits the bytes returned per web page. Set to no max.
             Note, ParlAI current defaults to 512 byte.
         search_engine set to "Google" default or "Bing"
-        use_description_only are short but 10X faster since no url gets 
+        use_description_only are short but 10X faster since no url gets
             for Bing only
         use_subscription_key required to use Bing only. Can get a free one at:
             https://www.microsoft.com/en-us/bing/apis/bing-entity-search-api
-
+        use_official_google_api is slower but more accurate.
+        google_search_key and google_search_cx required to use Google only.
+            Can get a free one at:
+            https://developers.google.com/custom-search/v1/overview
+        google_search_cx is the search engine ID.
         """
 
         global _REQUESTS_GET_TIMEOUT
@@ -412,8 +492,16 @@ class Application:
 
         _REQUESTS_GET_TIMEOUT = requests_get_timeout
 
-        self.check_and_print_cmdline_args(max_text_bytes, strip_html_menus,
-            search_engine, use_description_only, subscription_key)
+        self.check_and_print_cmdline_args(
+            max_text_bytes,
+            strip_html_menus,
+            search_engine,
+            use_description_only,
+            subscription_key,
+            use_official_google_api,
+            google_search_key,
+            google_search_cx,
+        )
 
         if search_engine == "Bing":
             request_handler = BingSearchRequestHandler
@@ -421,32 +509,66 @@ class Application:
             request_handler = GoogleSearchRequestHandler
 
         with SearchABCServer(
-                (hostname, int(port)), request_handler, 
-                max_text_bytes, strip_html_menus, 
-                use_description_only, subscription_key
-            ) as server:
-                print("Serving forever.")
-                print(f"Host: {host}")
-                server.serve_forever()
+            (hostname, int(port)),
+            request_handler,
+            max_text_bytes,
+            strip_html_menus,
+            use_description_only,
+            subscription_key,
+            use_official_google_api,
+            google_search_key,
+            google_search_cx,
+        ) as server:
+            print("Serving forever.")
+            print(f"Host: {host}")
+            server.serve_forever()
 
     def check_and_print_cmdline_args(
-            self, max_text_bytes, strip_html_menus,
-            search_engine, use_description_only, subscription_key
-        ) -> None:
+        self,
+        max_text_bytes,
+        strip_html_menus,
+        search_engine,
+        use_description_only,
+        subscription_key,
+        use_official_google_api,
+            google_search_key,
+            google_search_cx,
+    ) -> None:
 
         if search_engine == "Bing":
             if subscription_key is None:
                 print("Warning: subscription_key is required for Bing Search Engine")
                 print("To get one go to url:")
-                print("https://www.microsoft.com/en-us/bing/apis/bing-entity-search-api")
+                print(
+                    "https://www.microsoft.com/en-us/bing/apis/bing-entity-search-api"
+                )
                 exit()
         elif search_engine == "Google":
             if use_description_only:
-                print("Warning: use_description_only is not supported for Google Search Engine")
+                print(
+                    "Warning: use_description_only is not supported for Google Search Engine"
+                )
                 exit()
             if subscription_key is not None:
-                print("Warning: subscription_key is not supported for Google Search Engine")
+                print(
+                    "Warning: subscription_key is not supported for Google Search Engine"
+                )
                 exit()
+            if use_official_google_api:
+                if google_search_key is None:
+                    print(
+                        "Warning: google_search_key is required for Google Search Engine"
+                    )
+                    print("To get one go to url:")
+                    print("https://developers.google.com/custom-search/v1/overview")
+                    exit()
+                if google_search_cx is None:
+                    print(
+                        "Warning: google_search_cx is required for Google Search Engine"
+                    )
+                    print("To get one go to url:")
+                    print("https://developers.google.com/custom-search/v1/overview")
+                    exit()
 
         print("Command line args used:")
         print(f"  requests_get_timeout={_REQUESTS_GET_TIMEOUT}")
@@ -454,16 +576,19 @@ class Application:
         print(f"  max_text_bytes={max_text_bytes}")
         print(f"  search_engine={search_engine}")
         print(f"  use_description_only={use_description_only}")
+        print(f"  subscription_key={subscription_key}")
+        print(f"  use_official_google_api={use_official_google_api}")
+        print(f"  google_search_key={google_search_key}")
 
     def test_parser(self, url: str) -> None:
-        """ Test the webpage getter and parser.
+        """Test the webpage getter and parser.
         Will try to download the page, then parse it, then will display the result.
         """
         print(_get_and_parse(url))
 
-    def test_server(self, query: str, n: int, host : str = _DEFAULT_HOST) -> None:
+    def test_server(self, query: str, n: int, host: str = _DEFAULT_HOST) -> None:
 
-        """ Creates a thin fake client to test a server that is already up.
+        """Creates a thin fake client to test a server that is already up.
         Expects a server to have already been started with `python search_server.py serve [options]`.
         Creates a retriever client the same way ParlAi client does it for its chat bot, then
         sends a query to the server.
