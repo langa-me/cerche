@@ -5,3 +5,5 @@ env
 *.egg-info
 *.pyc
 __pycache
+
+.DS_Store

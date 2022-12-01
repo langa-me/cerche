@@ -1,6 +1,6 @@
 VERSION ?= $(shell cat setup.py | grep version | cut -d '"' -f 2)
 GCLOUD_PROJECT:=$(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
-NAME ?= search-engine
+NAME ?= cerche
 
 GOOGLE_SEARCH_CX := $(shell cat .env | grep -w GOOGLE_SEARCH_CX | cut -d "=" -f 2)
 GOOGLE_SEARCH_KEY := $(shell cat .env | grep -w GOOGLE_SEARCH_KEY | cut -d "=" -f 2)
@@ -30,7 +30,7 @@ docker/run: docker/build ## [Local development] run the docker container
 	docker run ${REGISTRY}:latest
 
 docker/run/hub:
-	docker run --rm --name search -p 8082:8082 langameai/search-engine:latest serve --host "0.0.0.0:8082"
+	docker run --rm --name search -p 8082:8082 langameai/cerche:latest serve --host "0.0.0.0:8082"
 
 docker/push: docker/build ## [Local development] push the docker image to GCR
 	docker push ${REGISTRY}:${VERSION}
@@ -81,7 +81,7 @@ release:
 	git push origin main; \
 	git tag $$VERSION; \
 	git push origin $$VERSION
-	echo "Done, check https://github.com/langa-me/search-engine/actions"
+	@echo "Done, check https://github.com/langa-me/search-engine/actions"
 
 
 .PHONY: help

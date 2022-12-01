@@ -51,14 +51,14 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            langameai/search-engine:latest
-            langameai/search-engine:${{ steps.get_version.outputs.VERSION }}
-            ghcr.io/${{ github.repository_owner }}/search-engine:latest
-            ghcr.io/${{ github.repository_owner }}/search-engine:${{ steps.get_version.outputs.VERSION }}
-            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/search-engine:latest
-            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/search-engine:${{ steps.get_version.outputs.VERSION }}
+            langameai/cerche:latest
+            langameai/cerche:${{ steps.get_version.outputs.VERSION }}
+            ghcr.io/${{ github.repository_owner }}/cerche:latest
+            ghcr.io/${{ github.repository_owner }}/cerche:${{ steps.get_version.outputs.VERSION }}
+            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/cerche:latest
+            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/cerche:${{ steps.get_version.outputs.VERSION }}
       - 
         name: Release
         uses: softprops/action-gh-release@v1
         env:
-          GITHUB_REPOSITORY: ${{ github.repository_owner }}/search-engine
+          GITHUB_REPOSITORY: ${{ github.repository_owner }}/cerche

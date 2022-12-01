@@ -15,7 +15,7 @@ if __name__ == "__main__":
         packages=find_packages(),
         include_package_data=True,
         entry_points={"console_scripts": ["cerche = cerche:main"]},
-        version="0.2.1",
+        version="0.2.2",
         description="",
         long_description=long_description,
         long_description_content_type="text/markdown",

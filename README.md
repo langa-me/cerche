@@ -1,4 +1,4 @@
-# search-engine
+# cerche
 
 This is an experimental search engine for conversational AI such as parl.ai, large language models such as OpenAI GPT3, and humans (maybe).
 
