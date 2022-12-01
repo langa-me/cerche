@@ -27,10 +27,10 @@ docker/build: ## [Local development] build the docker image
 	docker buildx build -t ${REGISTRY}:${VERSION} -t ${REGISTRY}:latest --platform linux/amd64 . -f ./Dockerfile
 
 docker/run: docker/build ## [Local development] run the docker container
-	docker run ${REGISTRY}:latest
+	docker run --rm --name search -p 8081:8081 ${REGISTRY}:latest serve --host "0.0.0.0:8081"
 
 docker/run/hub:
-	docker run --rm --name search -p 8082:8082 langameai/cerche:latest serve --host "0.0.0.0:8082"
+	docker run --rm --name search -p 8081:8081 langameai/cerche:latest serve --host "0.0.0.0:8081"
 
 docker/push: docker/build ## [Local development] push the docker image to GCR
 	docker push ${REGISTRY}:${VERSION}
@@ -81,7 +81,7 @@ release:
 	git push origin main; \
 	git tag $$VERSION; \
 	git push origin $$VERSION
-	@echo "Done, check https://github.com/langa-me/search-engine/actions"
+	@echo "Done, check https://github.com/langa-me/cerche/actions"
 
 
 .PHONY: help

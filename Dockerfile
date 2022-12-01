@@ -20,13 +20,14 @@ RUN chown ${USER} /home/${USER}
 WORKDIR /home/${USER}
 
 
-COPY ./main.py ./main.py
+COPY setup.py ./setup.py
 COPY requirements.txt ./requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -e .
+COPY ./cerche ./cerche
 
 ENV PYTHONUNBUFFERED 0
 
 USER ${UID}:${GID}
 
-ENTRYPOINT ["/opt/venv/bin/python", "./main.py"]
+ENTRYPOINT ["/opt/venv/bin/python", "./cerche/main.py"]
 CMD ["serve", "--host", "0.0.0.0:8081"]

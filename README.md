@@ -10,7 +10,7 @@ Start Docker.
 ```bash
 make docker/run/hub
 # in another terminal
-curl -X POST localhost:8083 -d "q=turing&n=1"
+curl -X POST localhost:8082 -d "q=turing&n=1"
 ```
 
 ## Development
