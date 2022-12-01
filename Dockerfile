@@ -20,7 +20,7 @@ RUN chown ${USER} /home/${USER}
 WORKDIR /home/${USER}
 
 
-COPY ./ss2.py ./ss2.py
+COPY ./main.py ./main.py
 COPY requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 
@@ -28,5 +28,5 @@ ENV PYTHONUNBUFFERED 0
 
 USER ${UID}:${GID}
 
-ENTRYPOINT ["/opt/venv/bin/python", "./ss2.py"]
+ENTRYPOINT ["/opt/venv/bin/python", "./main.py"]
 CMD ["serve", "--host", "0.0.0.0:8081"]

@@ -4,20 +4,23 @@ NAME ?= search-engine
 
 GOOGLE_SEARCH_CX := $(shell cat .env | grep -w GOOGLE_SEARCH_CX | cut -d "=" -f 2)
 GOOGLE_SEARCH_KEY := $(shell cat .env | grep -w GOOGLE_SEARCH_KEY | cut -d "=" -f 2)
+PROD_PROJECT_ID := $(shell cat .env | grep -w PROD_PROJECT_ID | cut -d "=" -f 2)
+DEV_PROJECT_ID := $(shell cat .env | grep -w DEV_PROJECT_ID | cut -d "=" -f 2)
+DATASET_URL := $(shell cat .env | grep -w DATASET_URL | cut -d "=" -f 2)
 
-ifeq ($(GCLOUD_PROJECT),langame-dev)
+ifeq ($(GCLOUD_PROJECT),$(DEV_PROJECT_ID))
 $(info "Using develoment configuration")
-REGISTRY ?= 5306t2h8.gra7.container-registry.ovh.net/dev/${NAME}
+REGISTRY ?= $(shell cat .env | grep -w DEV_REGISTRY | cut -d "=" -f 2)/${NAME}
 else
 $(info "Using production configuration")
-REGISTRY ?= 5306t2h8.gra7.container-registry.ovh.net/prod/${NAME}
+REGISTRY ?= $(shell cat .env | grep -w PROD_REGISTRY | cut -d "=" -f 2)/${NAME}
 endif
 
 prod: ## Set the GCP project to prod
-	gcloud config set project langame-86ac4
+	gcloud config set project ${PROD_PROJECT_ID}
 
 dev: ## Set the GCP project to dev
-	gcloud config set project langame-dev
+	gcloud config set project ${DEV_PROJECT_ID}
 
 
 docker/build: ## [Local development] build the docker image
@@ -43,18 +46,27 @@ bare/install: ## [Local development] Upgrade pip, install requirements, install 
 	)
 
 bare/run: ## [Local development] run the main entrypoint
-	python3 $(shell pwd)/ss2.py serve --host "0.0.0.0:8083"
+	cerche serve --host "0.0.0.0:8083"
 
 bare/run/test: ## [Local development] run the main entrypoint with official google
-	python3 $(shell pwd)/ss2.py test_server --host "0.0.0.0:8083" \
-		--query turing \
+	cerche test_server --host "0.0.0.0:8083" \
+		--query copywriting \
 		--n 3
 
 bare/run/google_official: ## [Local development] run the main entrypoint with official google
-	python3 $(shell pwd)/ss2.py serve --host "0.0.0.0:8083" \
+	cerche serve --host "0.0.0.0:8083" \
 		--use_official_google_api True \
-		--google_search_key ${GOOGLE_SEARCH_CX} \
-		--google_search_cx ${GOOGLE_SEARCH_KEY}
+		--google_search_key ${GOOGLE_SEARCH_KEY} \
+		--google_search_cx ${GOOGLE_SEARCH_CX}
+
+bare/run/use_dataset_urls: ## [Local development]
+	cerche serve --host "0.0.0.0:8083" \
+		--use_official_google_api True \
+		--google_search_key ${GOOGLE_SEARCH_KEY} \
+		--google_search_cx ${GOOGLE_SEARCH_CX} \
+		--use_dataset_urls ${DATASET_URL}
+
+
 
 clean:
 	rm -rf env .pytest_cache *.egg-info **/*__pycache__
@@ -67,8 +79,8 @@ release:
 	echo "Committing '$$VERSION: $$COMMIT'"; \
 	git commit -m "$$VERSION: $$COMMIT"; \
 	git push origin main; \
-	git tag v$$VERSION; \
-	git push origin v$$VERSION
+	git tag $$VERSION; \
+	git push origin $$VERSION
 	echo "Done, check https://github.com/langa-me/search-engine/actions"
 
 

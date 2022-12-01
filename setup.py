@@ -1,3 +1,4 @@
+from importlib_metadata import entry_points
 from setuptools import setup, find_packages
 from pathlib import Path
 
@@ -9,11 +10,12 @@ if __name__ == "__main__":
         long_description = file.read()
 
     setup(
-        name="search-engine",
+        name="cerche",
         author="Langame LLC",
         packages=find_packages(),
         include_package_data=True,
-        version="0.2.0",
+        entry_points={"console_scripts": ["cerche = cerche:main"]},
+        version="0.2.1",
         description="",
         long_description=long_description,
         long_description_content_type="text/markdown",
@@ -26,4 +28,5 @@ if __name__ == "__main__":
             "License :: OSI Approved :: MIT License",
             "Programming Language :: Python :: 3.6",
         ],
+        extras_require={"datasets": ["datasets", "gcsfs", "autofaiss"]},
     )

@@ -3,7 +3,7 @@ name: Build Docker images, push to Docker Hub
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "*.*.*"
 
 jobs:
   docker:
@@ -39,13 +39,9 @@ jobs:
           username: ${{ secrets.OVHCLOUD_REGISTRY_USERNAME }}
           password: ${{ secrets.OVHCLOUD_REGISTRY_PASSWORD }}
       - 
-        name: Get the tag
-        id: get_tag_name
-        # set the tag without the "v" prefix
-        # firstString="I love Suzi and Marry"
-        # secondString="Sara"
-        # echo "${firstString/Suzi/"$secondString"}"    
-        run: echo "TAG_NAME=$(echo ${{github.ref_name}} | sed 's/^v//')" >> $GITHUB_ENV
+        name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       -
         name: Build and push
         uses: docker/build-push-action@v2
@@ -56,11 +52,11 @@ jobs:
           push: true
           tags: |
             langameai/search-engine:latest
-            langameai/search-engine:${{ env.TAG_NAME }}
+            langameai/search-engine:${{ steps.get_version.outputs.VERSION }}
             ghcr.io/${{ github.repository_owner }}/search-engine:latest
-            ghcr.io/${{ github.repository_owner }}/search-engine:${{ env.TAG_NAME }}
+            ghcr.io/${{ github.repository_owner }}/search-engine:${{ steps.get_version.outputs.VERSION }}
             ${{ secrets.OVHCLOUD_REGISTRY }}/prod/search-engine:latest
-            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/search-engine:${{ env.TAG_NAME }}
+            ${{ secrets.OVHCLOUD_REGISTRY }}/prod/search-engine:${{ steps.get_version.outputs.VERSION }}
       - 
         name: Release
         uses: softprops/action-gh-release@v1

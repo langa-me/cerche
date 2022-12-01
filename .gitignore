@@ -4,3 +4,4 @@ env
 # python garbage
 *.egg-info
 *.pyc
+__pycache
