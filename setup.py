@@ -10,7 +10,7 @@ if __name__ == "__main__":
         packages=find_packages(),
         include_package_data=True,
         entry_points={"console_scripts": ["cerche = cerche:main"]},
-        version="0.2.3",
+        version="0.2.4",
         description="",
         data_files=[(".", ["README.md"])],
         install_requires=required,

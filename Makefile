@@ -46,21 +46,21 @@ bare/install: ## [Local development] Upgrade pip, install requirements, install 
 	)
 
 bare/run: ## [Local development] run the main entrypoint
-	cerche serve --host "0.0.0.0:8083"
+	cerche serve --host "0.0.0.0:8081"
 
 bare/run/test: ## [Local development] run the main entrypoint with official google
-	cerche test_server --host "0.0.0.0:8083" \
+	cerche test_server --host "0.0.0.0:8081" \
 		--query copywriting \
 		--n 3
 
 bare/run/google_official: ## [Local development] run the main entrypoint with official google
-	cerche serve --host "0.0.0.0:8083" \
+	cerche serve --host "0.0.0.0:8081" \
 		--use_official_google_api True \
 		--google_search_key ${GOOGLE_SEARCH_KEY} \
 		--google_search_cx ${GOOGLE_SEARCH_CX}
 
 bare/run/use_dataset_urls: ## [Local development]
-	cerche serve --host "0.0.0.0:8083" \
+	cerche serve --host "0.0.0.0:8081" \
 		--use_official_google_api True \
 		--google_search_key ${GOOGLE_SEARCH_KEY} \
 		--google_search_cx ${GOOGLE_SEARCH_CX} \
